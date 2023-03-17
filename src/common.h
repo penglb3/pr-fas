@@ -30,3 +30,13 @@ inline uint32_t get_in_degree(const SparseMatrix &mat, int point) {
 // TODO(implement).
 auto strongly_connected_components(const SparseMatrix &mat)
     -> std::vector<std::pair<int, SparseMatrix>>;
+
+inline uint64_t encode_edge(int from, int to) {
+  return (static_cast<uint64_t>(from) << 32) + to;
+}
+
+inline uint64_t encode_edge(Edge e) { return encode_edge(e.first, e.second); }
+
+inline Edge decode_edge(uint64_t edge_code) {
+  return {edge_code >> 32, edge_code & UINT32_MAX};
+}
