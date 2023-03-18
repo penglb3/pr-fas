@@ -43,14 +43,12 @@ set(PRFAS_HEADERS
 
 set(PRFAS_SOURCES
   src/page_rank.cc
-  src/test_bench.cc # This puppy is not ready to run.
   src/sort.cc
   src/greedy.cc
-  ${PRFAS_HEADERS}
 )
 
 # add_executable(page_rank src/page_rank.cc ${BACKWARD_ENABLE})
-add_library(fas SHARED src/greedy.cc src/sort.cc src/page_rank.cc)
+add_library(fas SHARED ${PRFAS_SOURCES})
 add_executable(test_bench src/test_bench.cc)
 target_link_libraries(test_bench PRIVATE fas)
 
