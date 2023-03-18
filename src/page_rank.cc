@@ -1,4 +1,5 @@
-#include "common.h"
+#include "page_rank.h"
+
 #include <algorithm>
 #include <iostream>
 #include <limits>
@@ -9,10 +10,6 @@
 #include <unordered_set>
 
 namespace prfas {
-using RankVec = std::vector<float>;
-using std::pair;
-using std::unordered_map;
-using std::vector;
 
 // PageRank iteration step: vec = vec * mat
 inline RankVec operator*(const RankVec &vec, const SparseMatrix &mat) {
@@ -55,8 +52,8 @@ inline RankVec operator*(const RankVec &vec, const T val) {
   return val * vec;
 }
 
-RankVec page_rank(const SparseMatrix &mat, const double beta = 0.85,
-                  const int max_iter = 30, const double stop_error = 1e-6) {
+RankVec page_rank(const SparseMatrix &mat, const double beta,
+                  const int max_iter, const double stop_error) {
   const auto size = mat.size();
   RankVec rank(size, static_cast<float>(1) / size);
   double error = std::numeric_limits<double>::infinity();

@@ -51,7 +51,15 @@ add_library(fas SHARED src/greedy.cc src/sort.cc src/page_rank.cc)
 add_executable(test_bench src/test_bench.cc)
 target_link_libraries(test_bench PRIVATE fas)
 
-add_test(NAME PageRankTest COMMAND test_bench)
+include_directories(src)
+add_executable(page_rank.test tests/page_rank.cc src/page_rank.cc)
+add_executable(sort.test tests/sort.cc src/sort.cc)
+add_executable(greedy.test tests/greedy.cc src/greedy.cc)
+
+add_test(NAME TestBench COMMAND test_bench)
+add_test(NAME PageRankTest COMMAND page_rank.test)
+add_test(NAME GreedyTest COMMAND greedy.test)
+add_test(NAME SortTest COMMAND sort.test)
 
 clangformat_setup(
   ${PRFAS_SOURCES}
