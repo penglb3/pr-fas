@@ -42,7 +42,10 @@ void remove_node(GreedyGraph &g, int point) {
     return;
   }
   // O(n^2)
-  for (auto &[_, neighbors] : g) {
+  for (auto &[from, neighbors] : g) {
+    if (from == point) {
+      continue;
+    }
     for (const auto &[target, _] : g[point]) {
       neighbors.erase(target);
     }
@@ -101,6 +104,7 @@ FAS greedy_fas(const SparseMatrix &mat) {
         ret.emplace_back(point, neighbor);
       }
     }
+    set.insert(point);
   }
   return ret;
 }
