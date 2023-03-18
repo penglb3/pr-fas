@@ -36,9 +36,15 @@ private:
 int main(int argc, const char *argv[]) {
   fas_solver solver_function;
   InputParser parser(argc, argv);
-  SparseMatrix mat;
+  constexpr int size = 5;
+  SparseMatrix mat(size);
 
   // Do some initialization for mat;
+  mat[0] = {{1, 1}, {2, 1}, {4, 1}};
+  mat[1] = {{0, 1}, {4, 1}};
+  mat[2] = {{1, 1}, {3, 1}};
+  mat[3] = {{0, 1}, {1, 1}};
+  mat[4] = {{3, 1}};
 
   if (parser.option_exists("-s")) {
     string solver_name = parser.get_option("-s");
@@ -51,6 +57,9 @@ int main(int argc, const char *argv[]) {
     } else {
       return -1;
     }
+  } else {
+    std::puts("test_bench should be called via -s solver option.");
+    return 0;
   }
   FAS result = solver_function(mat);
   // Do some validation and test.

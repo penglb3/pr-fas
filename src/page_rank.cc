@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <type_traits>
 #include <unordered_set>
+
+namespace prfas {
 using RankVec = std::vector<float>;
 using std::pair;
 using std::unordered_map;
@@ -66,7 +68,8 @@ RankVec page_rank(const SparseMatrix &mat, const double beta = 0.85,
 }
 
 // Calculates the line graph in 1 pass via BFS.
-// @param G : the graph to compute line graph on, need to be strongly connected
+// @param G : the graph to compute line graph on, need to be strongly
+// connected
 // @return : The result line graph and the edge index to recover edge info
 auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
   int n_edges = 0;
@@ -106,40 +109,6 @@ auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
   }
   return {res, edge_table};
 }
+}; // namespace prfas
 
-int main() {
-  constexpr int size = 5;
-  SparseMatrix mat(size);
-  /*
-    [0,1,1,0,1],
-    [1,0,0,0,1],
-    [0,1,0,1,0],
-    [1,1,0,0,0],
-    [0,0,0,1,0]
-  */
-  mat[0] = {{1, 1}, {2, 1}, {4, 1}};
-  mat[1] = {{0, 1}, {4, 1}};
-  mat[2] = {{1, 1}, {3, 1}};
-  mat[3] = {{0, 1}, {1, 1}};
-  mat[4] = {{3, 1}};
-
-  auto rank = page_rank(mat);
-  for (float i : rank) {
-    printf("%f ", i);
-  }
-  puts("");
-
-  // Test line graph
-  auto p = line_graph(mat);
-  puts("");
-  auto edges = p.second;
-  auto e_graph = p.first;
-  for (int i = 0; i < e_graph.size(); i++) {
-    for (auto kv : e_graph[i]) {
-      Edge src = edges[i];
-      Edge to = edges[kv.first];
-      printf("(%d,%d)->(%d,%d)\n", src.first, src.second, to.first, to.second);
-    }
-  }
-  return 0;
-}
+FAS page_rank_fas(const SparseMatrix &mat) { return {}; }

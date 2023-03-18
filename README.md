@@ -2,4 +2,7 @@
 PageRank FAS
 
 ## Build
-`cmake -B build` and then `cmake --build build`
+`cmake -S . -B build` and then `cmake --build build`
+
+## Run
+`./build/test_bench -s [greedy|sort|page_rank]`

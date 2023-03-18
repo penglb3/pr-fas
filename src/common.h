@@ -1,4 +1,6 @@
+#pragma once
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <unordered_map>
 #include <utility>
@@ -43,7 +45,7 @@ inline Edge decode_edge(uint64_t edge_code) {
 }
 
 using FAS = std::vector<Edge>;
-using fas_solver = FAS (*)(const SparseMatrix &mat);
+using fas_solver = std::function<FAS(const SparseMatrix &)>;
 FAS sort_fas(const SparseMatrix &mat);
 FAS greedy_fas(const SparseMatrix &mat);
 FAS page_rank_fas(const SparseMatrix &mat);

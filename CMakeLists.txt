@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 project(pagerank-fas VERSION 0.1)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-volatile -Wno-address-of-packed-member")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -46,9 +46,12 @@ set(PRFAS_SOURCES
   ${PRFAS_HEADERS}
 )
 
-add_executable(page_rank src/page_rank.cc ${BACKWARD_ENABLE})
+# add_executable(page_rank src/page_rank.cc ${BACKWARD_ENABLE})
+add_library(fas SHARED src/greedy.cc src/sort.cc src/page_rank.cc)
+add_executable(test_bench src/test_bench.cc)
+target_link_libraries(test_bench PRIVATE fas)
 
-add_test(NAME PageRankTest COMMAND page_rank)
+add_test(NAME PageRankTest COMMAND test_bench)
 
 clangformat_setup(
   ${PRFAS_SOURCES}
