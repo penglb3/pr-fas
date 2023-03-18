@@ -1,4 +1,6 @@
 #include "common.h"
+#include <climits>
+#include <cstdio>
 #include <list>
 #include <unordered_set>
 
@@ -69,15 +71,16 @@ FAS greedy_fas(const SparseMatrix &mat) {
       s2.push_front(target);
       gfas::remove_node(graph, target);
     }
-    uint32_t d_max = 0;
+    int d_max = INT_MIN;
     for (const auto &[point, _] : graph) {
       auto d_in = gfas::get_in_degree(graph, point);
       auto d_out = gfas::get_out_degree(graph, point);
-      if (uint32_t tmp = d_out - d_in; tmp > d_max) {
+      if (uint32_t tmp = d_out - d_in; static_cast<int>(tmp) > d_max) {
         target = point;
         d_max = tmp;
       }
     }
+    s1.push_back(target);
     gfas::remove_node(graph, target);
   }
   // Loop s1:s2 to generate answer
