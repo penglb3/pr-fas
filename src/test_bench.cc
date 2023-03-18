@@ -36,15 +36,19 @@ private:
 int main(int argc, const char *argv[]) {
   fas_solver solver_function;
   InputParser parser(argc, argv);
-  constexpr int size = 5;
+  constexpr int size = 7;
   SparseMatrix mat(size);
 
-  // Do some initialization for mat;
-  mat[0] = {{1, 1}, {2, 1}, {4, 1}};
-  mat[1] = {{0, 1}, {4, 1}};
-  mat[2] = {{1, 1}, {3, 1}};
-  mat[3] = {{0, 1}, {1, 1}};
-  mat[4] = {{3, 1}};
+  // Use standard example from TA's PPT.
+  add_edge(mat, 0, 1);
+  add_edge(mat, 1, 2);
+  add_edge(mat, 2, 3);
+  add_edge(mat, 3, 0);
+  add_edge(mat, 3, 1);
+
+  add_edge(mat, 4, 5);
+  add_edge(mat, 5, 6);
+  add_edge(mat, 6, 4);
 
   if (parser.option_exists("-s")) {
     string solver_name = parser.get_option("-s");

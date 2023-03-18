@@ -1,3 +1,4 @@
+#pragma once
 #include "common.h"
 using RankVec = std::vector<float>;
 

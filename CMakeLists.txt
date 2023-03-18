@@ -38,11 +38,14 @@ endif ()
 
 set(PRFAS_HEADERS 
   src/common.h
+  src/page_rank.h
 )
 
 set(PRFAS_SOURCES
   src/page_rank.cc
   src/test_bench.cc # This puppy is not ready to run.
+  src/sort.cc
+  src/greedy.cc
   ${PRFAS_HEADERS}
 )
 
