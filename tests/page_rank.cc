@@ -41,22 +41,22 @@ int main() {
   }
   puts("Line Graph test success.");
 
-  SparseMatrix scc_test(7);
+  SparseMatrix mat_std(7);
 
   // Use standard example from TA's PPT.
-  add_edge(scc_test, 0, 1);
-  add_edge(scc_test, 1, 2);
-  add_edge(scc_test, 2, 3);
-  add_edge(scc_test, 3, 0);
-  add_edge(scc_test, 3, 1);
+  add_edge(mat_std, 0, 1);
+  add_edge(mat_std, 1, 2);
+  add_edge(mat_std, 2, 3);
+  add_edge(mat_std, 3, 0);
+  add_edge(mat_std, 3, 1);
 
-  add_edge(scc_test, 4, 5);
-  add_edge(scc_test, 5, 6);
-  add_edge(scc_test, 6, 4);
+  add_edge(mat_std, 4, 5);
+  add_edge(mat_std, 5, 6);
+  add_edge(mat_std, 6, 4);
 
   // Function Call to find SCC using
   // Tarjan's Algorithm
-  SccSolver g1(scc_test);
+  SccSolver g1(mat_std);
   auto sccs = g1();
   for (const SCC &p : sccs) {
     auto m = p.first;
@@ -65,13 +65,21 @@ int main() {
       for (auto kv : m[i]) {
         int j = kv.first;
         // See if we can recover each edge correctly.
-        assert(scc_test[v[i]][v[j]] == 1);
+        assert(mat_std[v[i]][v[j]] == 1);
         // printf("scc[%d, %d]=>mat[%d, %d]=%d\n", i, j, v[i], v[j],
-        //        scc_test[v[i]][v[j]]);
+        //        mat_std[v[i]][v[j]]);
       }
     }
     // printf("\n");
   }
   puts("SCC extraction test success.");
+
+  FAS result = page_rank_fas(mat_std);
+  assert(result.size() == 2);
+  printf("The 2 FAs to be removed:\n");
+  for (Edge e : result) {
+    printf("<%d, %d>\n", e.first, e.second);
+  }
+  puts("PageRank FAS test success. VOILA!!!");
   return 0;
 }

@@ -15,8 +15,8 @@ inline bool add_edge(SparseMatrix &mat, int from, int to) {
   return mat[from].emplace(to, 1).second;
 }
 
-inline bool remove_edge(SparseMatrix &mat, int from, int to) {
-  return mat[from].erase(to) == 1;
+inline bool remove_edge(SparseMatrix &mat, const Edge &e) {
+  return mat[e.first].erase(e.second) == 1;
 }
 
 // O(1)

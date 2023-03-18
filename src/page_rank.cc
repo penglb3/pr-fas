@@ -1,5 +1,6 @@
 #include "page_rank.h"
 
+#include "common.h"
 #include <algorithm>
 #include <iostream>
 #include <limits>
@@ -210,19 +211,50 @@ auto SccSolver::operator()() -> vector<SCC> {
   return scc;
 }
 
-FAS page_rank_fas(const SparseMatrix &mat) {
+inline int argmax(const RankVec &rank) {
+  int index = 0;
+  float max_r = 0;
+  for (int i = 0; i < rank.size(); i++) {
+    if (rank[i] > max_r) {
+      index = i;
+      max_r = rank[i];
+    }
+  }
+  return index;
+};
+
+FAS page_rank_fas(const SparseMatrix &original_mat) {
   // FAS = []
+  FAS result;
   // Extract SCCs from mat
+  SparseMatrix mat(original_mat);
+  auto sccs = SccSolver(mat)();
   // While SCCs is not empty:
-  //   for scc, v_index in SCCs:
-  //     e_graph, edges = line_graph(scc)
-  //     rank = page_rank(scc)
-  //     fa_index = argmax(rank)
-  //     fa_scc = edges[fa_index]
-  //     fa = {v_index[fa_scc.from], v_index[fa_scc.to]}
-  //     FAS.append(fa)
-  //     mat.remove(fa)
-  //   Extract SCCs from mat
+  while (!sccs.empty()) {
+    //   for scc, v_index in SCCs:
+    for (const SCC& scc : sccs) {
+      SparseMatrix scc_m = scc.first;
+      vector<int> v_index = scc.second;
+      //     e_graph, edges = line_graph(scc)
+      auto lg = prfas::line_graph(scc_m);
+      SparseMatrix e_graph = lg.first;
+      vector<Edge> edges = lg.second;
+      //     rank = page_rank(scc)
+      auto rank = prfas::page_rank(e_graph);
+      //     fa_index = argmax(rank)
+      int fa_index = argmax(rank);
+      //     fa_scc = edges[fa_index]
+      Edge fa_scc = edges[fa_index];
+      //     fa = {v_index[fa_scc.from], v_index[fa_scc.to]}
+      Edge fa = {v_index[fa_scc.first], v_index[fa_scc.second]};
+      //     FAS.append(fa)
+      result.push_back(fa);
+      //     mat.remove(fa)
+      remove_edge(mat, fa);
+    }
+    //   Extract SCCs from mat
+    sccs = SccSolver(mat)();
+  }
   // return FAS;
-  return {};
+  return result;
 }
