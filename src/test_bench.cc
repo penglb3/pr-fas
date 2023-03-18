@@ -57,6 +57,9 @@ int main(int argc, const char *argv[]) {
     } else {
       return -1;
     }
+  } else {
+    std::puts("test_bench should be called via -s solver option.");
+    return 0;
   }
   FAS result = solver_function(mat);
   // Do some validation and test.
