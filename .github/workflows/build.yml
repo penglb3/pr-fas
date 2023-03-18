@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        # os: [ubuntu-22.04, ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive' 
+      - name: Setup gcc 10 as default
+        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        run: sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
+      # - name: ccache
+      #   uses: hendrikmuhs/ccache-action@v1.2
+      - name: Configure Debug
+        run: cmake --version && cmake -DCMAKE_BUILD_TYPE=Debug -Bcmake-build-debug .
+      - name: Build Debug
+        run: cmake --build cmake-build-debug
+      - name: Test Debug
+        run: cd cmake-build-debug && ctest --output-on-failure && cd ..
+      # - name: Configure Release
+      #   run: cmake --version && cmake -GNinja -DCMAKE_BUILD_TYPE=Release -Bcmake-build-release  .
+      # - name: Build Release
+      #   run: cmake --build cmake-build-release
+      # - name: Test Release
+      #   run: cd cmake-build-release && tree -L 3 && ctest && cd ..
+ 

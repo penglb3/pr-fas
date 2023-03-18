@@ -1,3 +1,4 @@
+#include "common.h"
 #include <algorithm>
 #include <iostream>
 #include <limits>
@@ -6,7 +7,6 @@
 #include <stdexcept>
 #include <type_traits>
 #include <unordered_set>
-#include "common.h"
 using RankVec = std::vector<float>;
 using std::pair;
 using std::unordered_map;
@@ -68,7 +68,7 @@ RankVec page_rank(const SparseMatrix &mat, const double beta = 0.85,
 // Calculates the line graph in 1 pass via BFS.
 // @param G : the graph to compute line graph on, need to be strongly connected
 // @return : The result line graph and the edge index to recover edge info
-pair<SparseMatrix, unordered_map<int, Edge>> line_graph(const SparseMatrix &G) {
+auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
   int n_edges = 0;
   for (const auto &row : G) {
     n_edges += row.size();
@@ -76,7 +76,7 @@ pair<SparseMatrix, unordered_map<int, Edge>> line_graph(const SparseMatrix &G) {
   SparseMatrix res(n_edges);
   std::unordered_set<int> visited;
   unordered_map<uint64_t, int> edge_index;
-  unordered_map<int, Edge> reverse_index;
+  vector<Edge> edge_table(n_edges);
   std::queue<Edge> q;
   q.push({-1, 0});
   // DO NOT add 0 to visited!
@@ -91,7 +91,7 @@ pair<SparseMatrix, unordered_map<int, Edge>> line_graph(const SparseMatrix &G) {
       uint64_t to_code = encode_edge(curr, next);
       auto it = edge_index.find(to_code);
       if (it == edge_index.end()) {
-        reverse_index.emplace(edge_index.size(), Edge(curr, next));
+        edge_table[edge_index.size()] = Edge(curr, next);
         it = edge_index.emplace(to_code, edge_index.size()).first;
       }
       if (prev >= 0) {
@@ -104,7 +104,7 @@ pair<SparseMatrix, unordered_map<int, Edge>> line_graph(const SparseMatrix &G) {
       }
     }
   }
-  return {res, reverse_index};
+  return {res, edge_table};
 }
 
 int main() {
@@ -132,12 +132,12 @@ int main() {
   // Test line graph
   auto p = line_graph(mat);
   puts("");
-  auto e_index = p.second;
+  auto edges = p.second;
   auto e_graph = p.first;
   for (int i = 0; i < e_graph.size(); i++) {
     for (auto kv : e_graph[i]) {
-      Edge src = e_index[i];
-      Edge to = e_index[kv.first];
+      Edge src = edges[i];
+      Edge to = edges[kv.first];
       printf("(%d,%d)->(%d,%d)\n", src.first, src.second, to.first, to.second);
     }
   }

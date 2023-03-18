@@ -11,6 +11,7 @@ ProcessorCount(N)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(ClangFormat)
 include(GitVersion)
+include(CTest)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
   set(ROCKSDB_USE_CLANG USE_CLANG=1 CC=clang CXX=clang++ "EXTRA_CXXFLAGS=-stdlib=libc++ -Wno-unused-but-set-variable")
@@ -41,10 +42,13 @@ set(PRFAS_HEADERS
 
 set(PRFAS_SOURCES
   src/page_rank.cc
+  src/test_bench.cc # This puppy is not ready to run.
   ${PRFAS_HEADERS}
 )
 
 add_executable(page_rank src/page_rank.cc ${BACKWARD_ENABLE})
+
+add_test(NAME PageRankTest COMMAND page_rank)
 
 clangformat_setup(
   ${PRFAS_SOURCES}
