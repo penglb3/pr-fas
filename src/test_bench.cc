@@ -34,7 +34,7 @@ private:
 
 // test_bench.cc
 int main(int argc, const char *argv[]) {
-  FasSolver *solver_ptr;
+  fas_solver solver_function;
   InputParser parser(argc, argv);
   SparseMatrix mat;
 
@@ -43,17 +43,17 @@ int main(int argc, const char *argv[]) {
   if (parser.option_exists("-s")) {
     string solver_name = parser.get_option("-s");
     if (solver_name == "greedy") {
-      solver_ptr = new GreedyFas(mat);
+      solver_function = greedy_fas;
     } else if (solver_name == "sort") {
-      solver_ptr = new SortFas(mat);
+      solver_function = sort_fas;
     } else if (solver_name == "page_rank") {
-      solver_ptr = new PageRankFas(mat);
+      solver_function = page_rank_fas;
+    } else {
+      return -1;
     }
   }
-  solver_ptr->solve();
-
+  FAS result = solver_function(mat);
   // Do some validation and test.
 
-  delete solver_ptr;
   return 0;
 }

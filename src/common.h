@@ -42,29 +42,8 @@ inline Edge decode_edge(uint64_t edge_code) {
   return {edge_code >> 32, edge_code & UINT32_MAX};
 }
 
-// All solvers should inherit this class and implement solve()
-class FasSolver {
-  SparseMatrix mat;
-
-public:
-  explicit FasSolver(const SparseMatrix& mat) : mat(mat){};
-  virtual std::vector<Edge> solve();
-};
-
-class GreedyFas : public FasSolver {
-public:
-  explicit GreedyFas(const SparseMatrix &mat);
-  std::vector<Edge> solve() override;
-};
-
-class SortFas : public FasSolver {
-public:
-  explicit SortFas(const SparseMatrix &mat);
-  std::vector<Edge> solve() override;
-};
-
-class PageRankFas : public FasSolver {
-public:
-  explicit PageRankFas(const SparseMatrix &mat);
-  std::vector<Edge> solve() override;
-};
+using FAS = std::vector<Edge>;
+using fas_solver = FAS (*)(const SparseMatrix &mat);
+FAS sort_fas(const SparseMatrix &mat);
+FAS greedy_fas(const SparseMatrix &mat);
+FAS page_rank_fas(const SparseMatrix &mat);
