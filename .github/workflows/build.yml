@@ -2,9 +2,8 @@ name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ *dev ]
   workflow_dispatch:
 
 jobs:
@@ -17,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: 'recursive' 
+          submodules: "recursive"
       - name: Setup gcc 10 as default
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         run: sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
@@ -35,4 +34,3 @@ jobs:
       #   run: cmake --build cmake-build-release
       # - name: Test Release
       #   run: cd cmake-build-release && tree -L 3 && ctest && cd ..
- 
