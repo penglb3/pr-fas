@@ -70,11 +70,9 @@ int main() {
   add_edge(mat_std, 5, 6);
   add_edge(mat_std, 6, 4);
 
-  // Function Call to find SCC using
-  // Tarjan's Algorithm
-  SCC_Solver g1(mat_std);
+  prfas::SCC_Solver g1(mat_std);
   auto sccs = g1();
-  for (const SCC &p : sccs) {
+  for (const prfas::SCC &p : sccs) {
     auto m = p.first;
     auto v = p.second;
     for (int i = 0; i < v.size(); i++) {

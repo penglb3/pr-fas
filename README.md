@@ -12,7 +12,7 @@ PageRank FAS
 ## Test Environments
 We tested and ran the programs under these environments:
 
-#1
+**#1**
 - OS: Ubuntu 22.04
 - Compiler: GCC 11.3.0
 - CMake: 3.22.1

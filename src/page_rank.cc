@@ -110,10 +110,8 @@ auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
   }
   return {res, edge_table};
 }
-}; // namespace prfas
 
 using std::min;
-using std::pair;
 using std::stack;
 using std::vector;
 
@@ -214,6 +212,8 @@ auto SCC_Solver::operator()() -> vector<SCC> {
   return scc;
 }
 
+}; // namespace prfas
+
 inline int argmax(const prfas::RankVec &rank) {
   int index = 0;
   float max_r = 0;
@@ -226,17 +226,18 @@ inline int argmax(const prfas::RankVec &rank) {
   return index;
 };
 
+using std::vector;
 FAS page_rank_fas(const SparseMatrix &original_mat) {
   // FAS = []
   FAS result;
   // Extract SCCs from mat
   SparseMatrix mat(original_mat);
-  auto solver = SCC_Solver(mat);
+  auto solver = prfas::SCC_Solver(mat);
   auto SCCs = solver();
   // While SCCs is not empty:
   while (!SCCs.empty()) {
     //   for scc, v_index in SCCs:
-    for (const SCC &scc : SCCs) {
+    for (const prfas::SCC &scc : SCCs) {
       SparseMatrix scc_m = scc.first;
       vector<int> v_index = scc.second;
       //     e_graph, edges = line_graph(scc)

@@ -36,16 +36,6 @@ inline uint32_t get_in_degree(const SparseMatrix &mat, int point) {
   return count;
 }
 
-inline uint64_t encode_edge(int from, int to) {
-  return (static_cast<uint64_t>(from) << 32) + to;
-}
-
-inline uint64_t encode_edge(Edge e) { return encode_edge(e.first, e.second); }
-
-inline Edge decode_edge(uint64_t edge_code) {
-  return {edge_code >> 32, edge_code & UINT32_MAX};
-}
-
 using FAS = std::vector<Edge>;
 using fas_solver = std::function<FAS(const SparseMatrix &)>;
 FAS sort_fas(const SparseMatrix &mat);
@@ -53,41 +43,3 @@ FAS greedy_fas(const SparseMatrix &mat);
 FAS page_rank_fas(const SparseMatrix &mat);
 
 void print_ans(const FAS &fas);
-
-// Feedback arcs only exist in a strongly connected directed graph.
-// So extracting strongly connected components not only narrows searching range
-// but also detects cycle! Another problem solved! ... I guess so?
-
-// Not sure if other algorithms need this, so I put it here in global namespace
-// BTW, SCC_Solver's member functions' implementations are in src/page_rank.cc.
-using SCC = std::pair<SparseMatrix, std::vector<int>>;
-
-// SCC solver: extracts all SCCs with >1 vertices.
-class SCC_Solver {
-  static constexpr int NIL = -1;
-  const SparseMatrix &mat;
-  std::stack<int> st;
-  // Current node's discovery time
-  int time;
-  // Stores the discovery times of the nodes
-  int *disc;
-  // Stores the nodes with least discovery time
-  int *low;
-  // Checks whether a node is in the stack or not
-  bool *stack_member;
-  // The result SCC
-  std::vector<SCC> scc;
-
-  // A Recursive DFS based function used by SCC
-  void scc_util(int u);
-
-public:
-  explicit SCC_Solver(const SparseMatrix &mat) : mat(mat) {
-    int v = mat.size();
-    disc = new int[v];
-    low = new int[v];
-    stack_member = new bool[v];
-  };
-  ~SCC_Solver() = default;
-  std::vector<SCC> operator()();
-};
