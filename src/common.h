@@ -52,6 +52,8 @@ FAS sort_fas(const SparseMatrix &mat);
 FAS greedy_fas(const SparseMatrix &mat);
 FAS page_rank_fas(const SparseMatrix &mat);
 
+void print_ans(const FAS &fas);
+
 // Feedback arcs only exist in a strongly connected directed graph.
 // So extracting strongly connected components not only narrows searching range
 // but also detects cycle! Another problem solved! ... I guess so?

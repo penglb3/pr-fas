@@ -1,22 +1,26 @@
 #include "common.h"
 #include <cstdio>
 
-void print_ans(const FAS &fas) {
-  for (const auto &[from, to] : fas) {
-    std::printf("<%d, %d>\n", from, to);
-  }
-}
-
 int main() {
   SparseMatrix mat0(4);
   add_edge(mat0, 0, 1);
-  add_edge(mat0, 2, 2);
+  add_edge(mat0, 1, 2);
   add_edge(mat0, 2, 3);
   add_edge(mat0, 3, 0);
   add_edge(mat0, 3, 1);
   FAS fas = greedy_fas(mat0);
   print_ans(fas);
+  std::puts("");
 
+  SparseMatrix mat1(4);
+  add_edge(mat1, 0, 1);
+  add_edge(mat1, 1, 0);
+  add_edge(mat1, 1, 2);
+  add_edge(mat1, 2, 3);
+  add_edge(mat1, 3, 0);
+  add_edge(mat1, 3, 1);
+  fas = greedy_fas(mat1);
+  print_ans(fas);
   std::puts("");
 
   SparseMatrix mat_std(7);

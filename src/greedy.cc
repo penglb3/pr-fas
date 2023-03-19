@@ -46,9 +46,7 @@ void remove_node(GreedyGraph &g, int point) {
     if (from == point) {
       continue;
     }
-    for (const auto &[target, _] : g[point]) {
-      neighbors.erase(target);
-    }
+    neighbors.erase(point);
   }
   g.erase(point);
 }
@@ -83,8 +81,10 @@ FAS greedy_fas(const SparseMatrix &mat) {
         d_max = tmp;
       }
     }
-    s1.push_back(target);
-    gfas::remove_node(graph, target);
+    if (!graph.empty()) {
+      s1.push_back(target);
+      gfas::remove_node(graph, target);
+    }
   }
   // Loop s1:s2 to generate answer
   FAS ret;
