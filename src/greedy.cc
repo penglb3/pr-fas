@@ -52,16 +52,16 @@ void remove_node(GreedyGraph &g, int point) {
 }
 
 namespace optimized {
-struct NodeRefs {
+struct greedy_t {
   using node_list_t = std::list<int>;
-  explicit NodeRefs(const SparseMatrix &mat)
-      : n_(mat.size()), node_nexts_(n_), node_classes_(2 * n_ - 3, {-1}) {
+  explicit greedy_t(const SparseMatrix &mat)
+      : n_(mat.size()), node_refs_(n_), node_classes_(2 * n_ - 3) {
     for (int i = 0; i < n_; ++i) {
       uint32_t d_in = ::get_in_degree(mat, i);
       uint32_t d_out = ::get_out_degree(mat, i);
       int ref_idx = get_ref_idx(n_, d_out, d_in);
-      node_nexts_[i] = node_classes_[ref_idx].begin();
       node_classes_[ref_idx].push_front(i);
+      node_refs_[i] = node_classes_[ref_idx].begin();
     }
   }
 
@@ -77,14 +77,12 @@ struct NodeRefs {
     return delta + n - 2;
   }
 
-  int get_class_size(int class_idx) {
-    return node_classes_[class_idx].size() - 1;
-  }
+  int get_class_size(int class_idx) { return node_classes_[class_idx].size(); }
 
-  node_list_t::iterator get_next_of_node(int n) { return node_nexts_[n]; }
+  node_list_t::iterator get_node_ref(int n) { return node_refs_[n]; }
 
   int n_;
-  std::vector<node_list_t::iterator> node_nexts_;
+  std::vector<node_list_t::iterator> node_refs_;
   std::vector<node_list_t> node_classes_;
 };
 
@@ -149,14 +147,13 @@ FAS greedy_fas(const SparseMatrix &mat) {
 }
 
 FAS greedy_fas_optimized(const SparseMatrix &mat) {
-  gfas::optimized::NodeRefs greedy(mat);
+  gfas::optimized::greedy_t greedy{mat};
   // Check preprocess
   for (int i = 0; i < mat.size(); ++i) {
-    std::printf("prev %d is: %d\n", i, *std::prev(greedy.get_next_of_node(i)));
+    std::printf("prev %d is: %d\n", i, *greedy.get_node_ref(i));
   }
   for (int i = 0; i < 2 * mat.size() - 3; ++i) {
     std::printf("class %d has %d nodes\n", i, greedy.get_class_size(i));
-    // Last element is -1
     for (const int n : greedy.node_classes_[i]) {
       std::printf("%d ", n);
     }
