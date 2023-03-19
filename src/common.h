@@ -40,6 +40,7 @@ using FAS = std::vector<Edge>;
 using fas_solver = std::function<FAS(const SparseMatrix &)>;
 FAS sort_fas(const SparseMatrix &mat);
 FAS greedy_fas(const SparseMatrix &mat);
+FAS greedy_fas_optimized(const SparseMatrix &mat);
 FAS page_rank_fas(const SparseMatrix &mat);
 
 void print_ans(const FAS &fas);
