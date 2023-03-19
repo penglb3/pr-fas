@@ -57,14 +57,16 @@ FAS page_rank_fas(const SparseMatrix &mat);
 // but also detects cycle! Another problem solved! ... I guess so?
 
 // Not sure if other algorithms need this, so I put it here in global namespace
-// BTW, SccSolver's member functions' implementations are in src/page_rank.cc.
+// BTW, SCC_Solver's member functions' implementations are in src/page_rank.cc.
 using SCC = std::pair<SparseMatrix, std::vector<int>>;
 
 // SCC solver: extracts all SCCs with >1 vertices.
-class SccSolver {
+class SCC_Solver {
   static constexpr int NIL = -1;
   const SparseMatrix &mat;
   std::stack<int> st;
+  // Current node's discovery time
+  int time;
   // Stores the discovery times of the nodes
   int *disc;
   // Stores the nodes with least discovery time
@@ -78,6 +80,12 @@ class SccSolver {
   void scc_util(int u);
 
 public:
-  explicit SccSolver(const SparseMatrix &mat) : mat(mat){};
+  explicit SCC_Solver(const SparseMatrix &mat) : mat(mat) {
+    int v = mat.size();
+    disc = new int[v];
+    low = new int[v];
+    stack_member = new bool[v];
+  };
+  ~SCC_Solver() = default;
   std::vector<SCC> operator()();
 };

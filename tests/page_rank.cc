@@ -56,7 +56,7 @@ int main() {
 
   // Function Call to find SCC using
   // Tarjan's Algorithm
-  SccSolver g1(mat_std);
+  SCC_Solver g1(mat_std);
   auto sccs = g1();
   for (const SCC &p : sccs) {
     auto m = p.first;

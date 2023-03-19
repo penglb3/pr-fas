@@ -115,9 +115,7 @@ using std::stack;
 using std::vector;
 
 // Recursive function to find the SCC using DFS traversal
-void SccSolver::scc_util(int u) {
-  static int time = 0;
-
+void SCC_Solver::scc_util(int u) {
   // Initialize discovery time and low value
   disc[u] = low[u] = ++time;
   st.push(u);
@@ -182,12 +180,13 @@ void SccSolver::scc_util(int u) {
 }
 
 // Function to find the SCC in the graph
-auto SccSolver::operator()() -> vector<SCC> {
+auto SCC_Solver::operator()() -> vector<SCC> {
   int v = mat.size();
-
-  disc = new int[v];
-  low = new int[v];
-  stack_member = new bool[v];
+  time = 0;
+  // Clear last calculation's result
+  if (!scc.empty()) {
+    scc.clear();
+  }
 
   // Initialize disc and low, and stackMember arrays
   for (int i = 0; i < v; i++) {
@@ -204,9 +203,10 @@ auto SccSolver::operator()() -> vector<SCC> {
     }
   }
 
-  delete stack_member;
-  delete low;
-  delete disc;
+  // Shouldn't happen, but just in case.
+  while (!st.empty()) {
+    st.pop();
+  }
 
   return scc;
 }
@@ -228,11 +228,12 @@ FAS page_rank_fas(const SparseMatrix &original_mat) {
   FAS result;
   // Extract SCCs from mat
   SparseMatrix mat(original_mat);
-  auto sccs = SccSolver(mat)();
+  auto solver = SCC_Solver(mat);
+  auto SCCs = solver();
   // While SCCs is not empty:
-  while (!sccs.empty()) {
+  while (!SCCs.empty()) {
     //   for scc, v_index in SCCs:
-    for (const SCC& scc : sccs) {
+    for (const SCC &scc : SCCs) {
       SparseMatrix scc_m = scc.first;
       vector<int> v_index = scc.second;
       //     e_graph, edges = line_graph(scc)
@@ -253,7 +254,7 @@ FAS page_rank_fas(const SparseMatrix &original_mat) {
       remove_edge(mat, fa);
     }
     //   Extract SCCs from mat
-    sccs = SccSolver(mat)();
+    SCCs = solver();
   }
   // return FAS;
   return result;
