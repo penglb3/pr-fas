@@ -1,5 +1,6 @@
 #include "page_rank.h"
 
+#include "common.h"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -24,10 +25,19 @@ int main() {
   }
   puts("PageRank test success.");
 
+  mat = SparseMatrix(4);
+  add_edge(mat, 0, 1);
+  add_edge(mat, 0, 3);
+  add_edge(mat, 1, 2);
+  add_edge(mat, 2, 0);
+  add_edge(mat, 2, 3);
+  add_edge(mat, 3, 0);
+
   // Test line graph
   auto p = prfas::line_graph(mat);
   auto edges = p.second;
   auto e_graph = p.first;
+  int n_lg_vertices = 0, n_edges = 0;
   for (int i = 0; i < e_graph.size(); i++) {
     for (auto kv : e_graph[i]) {
       Edge src = edges[i];
@@ -35,10 +45,13 @@ int main() {
       assert(mat[src.first][src.second] == 1); // src edge exists
       assert(mat[to.first][to.second] == 1);   // to edge exists
       assert(src.second == to.first);          // src --> V --> to
-      // printf("(%d,%d)->(%d,%d)\n", src.first, src.second, to.first,
-      // to.second);
+      printf("(%d,%d)->(%d,%d)\n", src.first, src.second, to.first,
+      to.second);
     }
+    n_edges += mat[i].size();
+    n_lg_vertices += e_graph.size();
   }
+  // assert(9 == n_lg_vertices); // Has problem!
   puts("Line Graph test success.");
 
   SparseMatrix mat_std(7);

@@ -65,10 +65,6 @@ RankVec page_rank(const SparseMatrix &mat, const double beta,
   return rank;
 }
 
-// Calculates the line graph in 1 pass via BFS.
-// @param G : the graph to compute line graph on, need to be strongly
-// connected
-// @return : The result line graph and the edge index to recover edge info
 auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
   int n_edges = 0;
   for (const auto &row : G) {
@@ -211,7 +207,7 @@ auto SCC_Solver::operator()() -> vector<SCC> {
   return scc;
 }
 
-inline int argmax(const RankVec &rank) {
+inline int argmax(const prfas::RankVec &rank) {
   int index = 0;
   float max_r = 0;
   for (int i = 0; i < rank.size(); i++) {
