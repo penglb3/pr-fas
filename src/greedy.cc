@@ -46,9 +46,7 @@ void remove_node(GreedyGraph &g, int point) {
     if (from == point) {
       continue;
     }
-    for (const auto &[target, _] : g[point]) {
-      neighbors.erase(target);
-    }
+    neighbors.erase(point);
   }
   g.erase(point);
 }
