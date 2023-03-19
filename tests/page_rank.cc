@@ -37,21 +37,24 @@ int main() {
   auto p = prfas::line_graph(mat);
   auto edges = p.second;
   auto e_graph = p.first;
-  int n_lg_vertices = 0, n_edges = 0;
+  int n_lg_edges = 0;
   for (int i = 0; i < e_graph.size(); i++) {
     for (auto kv : e_graph[i]) {
-      Edge src = edges[i];
-      Edge to = edges[kv.first];
-      assert(mat[src.first][src.second] == 1); // src edge exists
-      assert(mat[to.first][to.second] == 1);   // to edge exists
-      assert(src.second == to.first);          // src --> V --> to
-      printf("(%d,%d)->(%d,%d)\n", src.first, src.second, to.first,
-      to.second);
+      Edge e_in = edges[i];
+      Edge e_out = edges[kv.first];
+      assert(mat[e_in.first][e_in.second] == 1);   // in edge exists
+      assert(mat[e_out.first][e_out.second] == 1); // out edge exists
+      assert(e_in.second == e_out.first);          // e_in --> V --> e_out
+      // printf("(%d,%d)->(%d,%d)\n", e_in.first, e_in.second, e_out.first,
+      // e_out.second);
     }
-    n_edges += mat[i].size();
-    n_lg_vertices += e_graph.size();
+    n_lg_edges += e_graph[i].size();
   }
-  // assert(9 == n_lg_vertices); // Has problem!
+  int n_expected_lg_edges = 0;
+  for (int i = 0; i < mat.size(); i++) {
+    n_expected_lg_edges += get_in_degree(mat, i) * get_out_degree(mat, i);
+  }
+  assert(n_expected_lg_edges == n_lg_edges); // Fixed!
   puts("Line Graph test success.");
 
   SparseMatrix mat_std(7);
@@ -93,6 +96,6 @@ int main() {
   for (Edge e : result) {
     printf("<%d, %d>\n", e.first, e.second);
   }
-  puts("PageRank FAS test success. VOILA!!!");
+  puts("PageRank FAS test success.");
   return 0;
 }

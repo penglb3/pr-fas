@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <limits>
 #include <queue>
@@ -65,6 +66,17 @@ RankVec page_rank(const SparseMatrix &mat, const double beta,
   return rank;
 }
 
+inline int find_or_add_edge_index(unordered_map<uint64_t, int> &index,
+                                  vector<Edge> &table, int from, int to) {
+  uint64_t code = encode_edge(from, to);
+  auto it = index.find(code);
+  if (it == index.end()) {
+    table[index.size()] = Edge(from, to);
+    it = index.emplace(code, index.size()).first;
+  }
+  return it->second;
+}
+
 auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
   int n_edges = 0;
   for (const auto &row : G) {
@@ -74,30 +86,25 @@ auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
   std::unordered_set<int> visited;
   unordered_map<uint64_t, int> edge_index;
   vector<Edge> edge_table(n_edges);
-  std::queue<Edge> q;
-  q.push({-1, 0});
+  std::queue<int> q;
+  q.push(0);
+  visited.insert(0);
   // DO NOT add 0 to visited!
   while (!q.empty()) {
-    Edge p = q.front();
+    int begin = q.front();
     q.pop();
-    int prev = p.first;
-    int curr = p.second;
-    uint64_t from_code = encode_edge(p);
-    for (auto kv : G[curr]) {
-      int next = kv.first;
-      uint64_t to_code = encode_edge(curr, next);
-      auto it = edge_index.find(to_code);
-      if (it == edge_index.end()) {
-        edge_table[edge_index.size()] = Edge(curr, next);
-        it = edge_index.emplace(to_code, edge_index.size()).first;
+    for (const auto &p : G[begin]) {
+      int mid = p.first;
+      int e_in = find_or_add_edge_index(edge_index, edge_table, begin, mid);
+      for (const auto &kv : G[mid]) {
+        int end = kv.first;
+        int e_out = find_or_add_edge_index(edge_index, edge_table, mid, end);
+        res[e_in][e_out] = 1;
+        // printf("#(%d,%d)->#(%d,%d)\n", begin, mid, mid, end);
       }
-      if (prev >= 0) {
-        res[edge_index[from_code]][it->second] = 1;
-        // printf("#(%d,%d)->#(%d,%d)\n", prev, curr, curr, next);
-      }
-      if (visited.find(next) == visited.end()) {
-        q.emplace(curr, next);
-        visited.insert(next);
+      if (visited.find(mid) == visited.end()) {
+        q.push(mid);
+        visited.insert(mid);
       }
     }
   }
