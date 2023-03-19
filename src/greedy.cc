@@ -83,8 +83,10 @@ FAS greedy_fas(const SparseMatrix &mat) {
         d_max = tmp;
       }
     }
-    s1.push_back(target);
-    gfas::remove_node(graph, target);
+    if (!graph.empty()) {
+      s1.push_back(target);
+      gfas::remove_node(graph, target);
+    }
   }
   // Loop s1:s2 to generate answer
   FAS ret;
