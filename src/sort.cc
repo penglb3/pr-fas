@@ -23,7 +23,7 @@ FAS sort_fas(const SparseMatrix &mat) {
     int min = 0;
     auto loc = curr;
     auto it = curr;
-    for (int j = i - 1; j > 0; --j) {
+    for (int j = i - 1; j >= 0; --j) {
       it = std::prev(it);
       int w = *it;
       if (const auto &edges = mat[v]; edges.find(w) != edges.end()) {
