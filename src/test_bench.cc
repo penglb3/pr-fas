@@ -75,6 +75,11 @@ auto read_input(const string &filename) -> std::pair<SparseMatrix, int> {
   }
   return {mat, n_edges};
 }
+std::unordered_map<std::string, fas_solver> func_mapping{
+    {"sort", sort_fas},
+    {"greedy", greedy_fas},
+    {"greedy_opt", greedy_fas_optimized},
+    {"page_rank", page_rank_fas}};
 
 // test_bench.cc
 int main(int argc, const char *argv[]) {
@@ -84,14 +89,10 @@ int main(int argc, const char *argv[]) {
   fas_solver solver_function = page_rank_fas;
   string solver_name = "page_rank";
   if (parser.option_exists("-s")) {
-    solver_name = parser.get_option("-s");
-    if (solver_name == "greedy") {
-      solver_function = greedy_fas;
-    } else if (solver_name == "greedy_opt") {
-      solver_function = greedy_fas; // @hxt
-    } else if (solver_name == "sort") {
-      solver_function = sort_fas;
-    } else if (solver_name != "page_rank") {
+    string solver_name = parser.get_option("-s");
+    if (auto it = func_mapping.find(solver_name); it != func_mapping.end()) {
+      solver_function = func_mapping[solver_name];
+    } else {
       return -1;
     }
   }
@@ -116,6 +117,7 @@ int main(int argc, const char *argv[]) {
 
   float fas_percentage = result.size() * static_cast<float>(100) / n_edges;
   printf("Result FAS size = %lu (%.2f%%)\n", result.size(), fas_percentage);
+  // Do some validation and test.
 
   return 0;
 }

@@ -11,6 +11,9 @@ int main() {
   FAS fas = greedy_fas(mat0);
   print_ans(fas);
   std::puts("");
+  fas = greedy_fas_optimized(mat0);
+  print_ans(fas);
+  std::puts("");
 
   SparseMatrix mat1(4);
   add_edge(mat1, 0, 1);
@@ -20,6 +23,9 @@ int main() {
   add_edge(mat1, 3, 0);
   add_edge(mat1, 3, 1);
   fas = greedy_fas(mat1);
+  print_ans(fas);
+  std::puts("");
+  fas = greedy_fas_optimized(mat1);
   print_ans(fas);
   std::puts("");
 
@@ -35,7 +41,10 @@ int main() {
   add_edge(mat_std, 5, 6);
   add_edge(mat_std, 6, 4);
 
-  FAS fas_std = greedy_fas(mat_std);
-  print_ans(fas_std);
+  fas = greedy_fas(mat_std);
+  print_ans(fas);
+  std::puts("");
+  fas = greedy_fas_optimized(mat_std);
+  print_ans(fas);
   return 0;
 }

@@ -44,12 +44,12 @@ FAS sort_fas(const SparseMatrix &mat) {
     next = std::next(curr);
   }
 
-#if !defined(NDEBUG)
-  for (const int i : order) {
-    std::printf("%d ", i);
-  }
-  std::puts("");
-#endif
+  // #if !defined(NDEBUG)
+  //   for (const int i : order) {
+  //     std::printf("%d ", i);
+  //   }
+  //   std::puts("");
+  // #endif
 
   FAS ret;
   std::unordered_set<int> set;
