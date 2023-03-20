@@ -51,6 +51,30 @@ void remove_node(GreedyGraph &g, int point) {
   g.erase(point);
 }
 
+FAS merge_s1s2(const SparseMatrix &mat, const std::vector<int> &s1,
+               const std::list<int> &s2) {
+  FAS ret;
+  // Record visited nodes
+  std::unordered_set<int> set;
+  for (const int point : s1) {
+    for (const auto &[neighbor, _] : mat[point]) {
+      if (set.find(neighbor) != set.end()) {
+        ret.emplace_back(point, neighbor);
+      }
+    }
+    set.insert(point);
+  }
+  for (const int point : s2) {
+    for (const auto &[neighbor, _] : mat[point]) {
+      if (set.find(neighbor) != set.end()) {
+        ret.emplace_back(point, neighbor);
+      }
+    }
+    set.insert(point);
+  }
+  return ret;
+}
+
 namespace optimized {
 struct greedy_t {
   using node_list_t = std::list<int>;
@@ -87,8 +111,6 @@ struct greedy_t {
     return nodes_.find(point) == nodes_.end() ? -1 : node_class_indices_[point];
   }
 
-  node_list_t::iterator get_node_ref(int n) const { return node_refs_[n]; }
-
   int get_sink_node() const {
     auto sink_nodes = node_classes_[0];
     return sink_nodes.empty() ? -1 : *sink_nodes.begin();
@@ -114,9 +136,11 @@ struct greedy_t {
     return ret;
   }
 
+  // O(n)
   void remove_node(int point) {
     // Delete out edges
     for (const auto &[neighbor, _] : mat_[point]) {
+      // If there is an edge from pont to neighbor
       if (nodes_.find(neighbor) != nodes_.end()) {
         int delta = get_node_class(neighbor);
         node_classes_[delta].erase(node_refs_[neighbor]);
@@ -127,9 +151,11 @@ struct greedy_t {
     }
     // Delete in edges
     for (int i = 0; i < n_; ++i) {
+      // Skip the point itself and nodes that have been removed
       if (i == point || (nodes_.find(i) == nodes_.end())) {
         continue;
       }
+      // If there is an edge from i to point
       if (const auto &neighbors = mat_[i];
           neighbors.find(point) != neighbors.end()) {
         int delta = get_node_class(i);
@@ -148,7 +174,7 @@ struct greedy_t {
   const SparseMatrix &mat_;
   // Store reference to each node in one of class lists
   std::vector<node_list_t::iterator> node_refs_;
-  // Store the class per node belongs to
+  // delta = d_out - d_in for each node
   std::vector<int> node_class_indices_;
   // The node classes
   std::vector<node_list_t> node_classes_;
@@ -192,45 +218,15 @@ FAS greedy_fas(const SparseMatrix &mat) {
       gfas::remove_node(graph, target);
     }
   }
-  // Loop s1:s2 to generate answer
-  FAS ret;
-  // Record visited nodes
-  std::unordered_set<int> set;
-  for (const int point : s1) {
-    for (const auto &[neighbor, _] : mat[point]) {
-      if (set.find(neighbor) != set.end()) {
-        ret.emplace_back(point, neighbor);
-      }
-    }
-    set.insert(point);
-  }
-  for (const int point : s2) {
-    for (const auto &[neighbor, _] : mat[point]) {
-      if (set.find(neighbor) != set.end()) {
-        ret.emplace_back(point, neighbor);
-      }
-    }
-    set.insert(point);
-  }
-  return ret;
+  return gfas::merge_s1s2(mat, s1, s2);
 }
 
 FAS greedy_fas_optimized(const SparseMatrix &mat) {
   gfas::optimized::greedy_t greedy{mat};
-  // Check preprocess
-  // for (int i = 0; i < mat.size(); ++i) {
-  //   std::printf("prev %d is: %d\n", i, *greedy.get_node_ref(i));
-  // }
-  // for (int i = 0; i < 2 * mat.size() - 3; ++i) {
-  //   std::printf("class %d has %d nodes\n", i, greedy.get_class_size(i));
-  //   for (const int n : greedy.node_classes_[i]) {
-  //     std::printf("%d ", n);
-  //   }
-  //   std::puts("");
-  // }
 
   std::vector<int> s1;
   std::list<int> s2;
+  // O(n^2)
   while (!greedy.empty()) {
     int target;
     while ((target = greedy.get_sink_node()) != -1) {
@@ -247,25 +243,5 @@ FAS greedy_fas_optimized(const SparseMatrix &mat) {
       greedy.remove_node(target);
     }
   }
-  // Loop s1:s2 to generate answer
-  FAS ret;
-  // Record visited nodes
-  std::unordered_set<int> set;
-  for (const int point : s1) {
-    for (const auto &[neighbor, _] : mat[point]) {
-      if (set.find(neighbor) != set.end()) {
-        ret.emplace_back(point, neighbor);
-      }
-    }
-    set.insert(point);
-  }
-  for (const int point : s2) {
-    for (const auto &[neighbor, _] : mat[point]) {
-      if (set.find(neighbor) != set.end()) {
-        ret.emplace_back(point, neighbor);
-      }
-    }
-    set.insert(point);
-  }
-  return ret;
+  return gfas::merge_s1s2(mat, s1, s2);
 }
