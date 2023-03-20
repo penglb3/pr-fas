@@ -55,13 +55,16 @@ namespace optimized {
 struct greedy_t {
   using node_list_t = std::list<int>;
   explicit greedy_t(const SparseMatrix &mat)
-      : n_(mat.size()), node_refs_(n_), node_classes_(2 * n_ - 3) {
+      : mat_(mat), n_(mat.size()), node_refs_(n_), node_classes_(2 * n_ - 3),
+        node_class_indices_(n_) {
     for (int i = 0; i < n_; ++i) {
       uint32_t d_in = ::get_in_degree(mat, i);
       uint32_t d_out = ::get_out_degree(mat, i);
       int ref_idx = get_ref_idx(n_, d_out, d_in);
+      node_class_indices_[i] = ref_idx;
       node_classes_[ref_idx].push_front(i);
       node_refs_[i] = node_classes_[ref_idx].begin();
+      nodes_.insert(i);
     }
   }
 
@@ -77,13 +80,79 @@ struct greedy_t {
     return delta + n - 2;
   }
 
-  int get_class_size(int class_idx) { return node_classes_[class_idx].size(); }
+  int size() const { return nodes_.size(); }
+  bool empty() const { return nodes_.empty(); }
 
-  node_list_t::iterator get_node_ref(int n) { return node_refs_[n]; }
+  int get_node_class(int point) const {
+    return nodes_.find(point) == nodes_.end() ? -1 : node_class_indices_[point];
+  }
+
+  node_list_t::iterator get_node_ref(int n) const { return node_refs_[n]; }
+
+  int get_sink_node() const {
+    auto sink_nodes = node_classes_[0];
+    return sink_nodes.empty() ? -1 : *sink_nodes.begin();
+  }
+
+  int get_source_node() const {
+    auto source_nodes = node_classes_[2 * n_ - 4];
+    return source_nodes.empty() ? -1 : *source_nodes.begin();
+  }
+
+  int get_delta_node() const {
+    if (nodes_.empty()) {
+      return -1;
+    }
+    int ret;
+    // Loop in the desacending order of delta = d_out - d_in
+    for (int i = 2 * n_ - 5; i > 0; --i) {
+      if (!node_classes_[i].empty()) {
+        ret = *node_classes_[i].begin();
+        break;
+      }
+    }
+    return ret;
+  }
+
+  void remove_node(int point) {
+    // Delete out edges
+    for (const auto &[neighbor, _] : mat_[point]) {
+      if (nodes_.find(neighbor) != nodes_.end()) {
+        int delta = get_node_class(neighbor);
+        node_classes_[delta].erase(node_refs_[neighbor]);
+        node_classes_[delta + 1].push_front(neighbor);
+        node_refs_[neighbor] = node_classes_[delta + 1].begin();
+        node_class_indices_[neighbor] = delta + 1;
+      }
+    }
+    // Delete in edges
+    for (int i = 0; i < n_; ++i) {
+      if (i == point || (nodes_.find(i) == nodes_.end())) {
+        continue;
+      }
+      if (const auto &neighbors = mat_[i];
+          neighbors.find(point) != neighbors.end()) {
+        int delta = get_node_class(i);
+        node_classes_[delta].erase(node_refs_[i]);
+        node_classes_[delta - 1].push_front(i);
+        node_refs_[i] = node_classes_[delta - 1].begin();
+        node_class_indices_[i] = delta - 1;
+      }
+    }
+    int d = get_node_class(point);
+    node_classes_[d].erase(node_refs_[point]);
+    nodes_.erase(point);
+  }
 
   int n_;
+  const SparseMatrix &mat_;
+  // Store reference to each node in one of class lists
   std::vector<node_list_t::iterator> node_refs_;
+  // Store the class per node belongs to
+  std::vector<int> node_class_indices_;
+  // The node classes
   std::vector<node_list_t> node_classes_;
+  std::unordered_set<int> nodes_;
 };
 
 }; // namespace optimized
@@ -149,15 +218,54 @@ FAS greedy_fas(const SparseMatrix &mat) {
 FAS greedy_fas_optimized(const SparseMatrix &mat) {
   gfas::optimized::greedy_t greedy{mat};
   // Check preprocess
-  for (int i = 0; i < mat.size(); ++i) {
-    std::printf("prev %d is: %d\n", i, *greedy.get_node_ref(i));
-  }
-  for (int i = 0; i < 2 * mat.size() - 3; ++i) {
-    std::printf("class %d has %d nodes\n", i, greedy.get_class_size(i));
-    for (const int n : greedy.node_classes_[i]) {
-      std::printf("%d ", n);
+  // for (int i = 0; i < mat.size(); ++i) {
+  //   std::printf("prev %d is: %d\n", i, *greedy.get_node_ref(i));
+  // }
+  // for (int i = 0; i < 2 * mat.size() - 3; ++i) {
+  //   std::printf("class %d has %d nodes\n", i, greedy.get_class_size(i));
+  //   for (const int n : greedy.node_classes_[i]) {
+  //     std::printf("%d ", n);
+  //   }
+  //   std::puts("");
+  // }
+
+  std::vector<int> s1;
+  std::list<int> s2;
+  while (!greedy.empty()) {
+    int target;
+    while ((target = greedy.get_sink_node()) != -1) {
+      s2.push_front(target);
+      greedy.remove_node(target);
     }
-    std::puts("");
+    while ((target = greedy.get_source_node()) != -1) {
+      s1.push_back(target);
+      greedy.remove_node(target);
+    }
+    target = greedy.get_delta_node();
+    if (target != -1) {
+      s1.push_back(target);
+      greedy.remove_node(target);
+    }
   }
-  return {};
+  // Loop s1:s2 to generate answer
+  FAS ret;
+  // Record visited nodes
+  std::unordered_set<int> set;
+  for (const int point : s1) {
+    for (const auto &[neighbor, _] : mat[point]) {
+      if (set.find(neighbor) != set.end()) {
+        ret.emplace_back(point, neighbor);
+      }
+    }
+    set.insert(point);
+  }
+  for (const int point : s2) {
+    for (const auto &[neighbor, _] : mat[point]) {
+      if (set.find(neighbor) != set.end()) {
+        ret.emplace_back(point, neighbor);
+      }
+    }
+    set.insert(point);
+  }
+  return ret;
 }
