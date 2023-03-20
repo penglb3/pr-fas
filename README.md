@@ -11,9 +11,10 @@ PageRank FAS
 
 ## Run
 `./build/test_bench [-s greedy|greedy_opt|sort|page_rank] [-i <input_file_path>]`
+
 Parameters:
 - `-s`: Specify solver. Optional. Default value = `page_rank`
-- `-i`: Specify input dataset file path. Optional. Default = use standatd small graph from TA's slides.
+- `-i`: Specify input dataset file path. Optional. Default = use standard small graph from TA's slides.
 
 ## Test Environments
 We tested and ran the programs under these environments:

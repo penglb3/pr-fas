@@ -83,16 +83,10 @@ auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
     n_edges += row.size();
   }
   SparseMatrix res(n_edges);
-  std::unordered_set<int> visited;
   unordered_map<uint64_t, int> edge_index;
   vector<Edge> edge_table(n_edges);
-  std::queue<int> q;
-  q.push(0);
-  visited.insert(0);
   // DO NOT add 0 to visited!
-  while (!q.empty()) {
-    int begin = q.front();
-    q.pop();
+  for (int begin = 0; begin < G.size(); begin++) {
     for (const auto &p : G[begin]) {
       int mid = p.first;
       int e_in = find_or_add_edge_index(edge_index, edge_table, begin, mid);
@@ -101,10 +95,6 @@ auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
         int e_out = find_or_add_edge_index(edge_index, edge_table, mid, end);
         res[e_in][e_out] = 1;
         // printf("#(%d,%d)->#(%d,%d)\n", begin, mid, mid, end);
-      }
-      if (visited.find(mid) == visited.end()) {
-        q.push(mid);
-        visited.insert(mid);
       }
     }
   }
