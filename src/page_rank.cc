@@ -6,7 +6,6 @@
 #include <iostream>
 #include <limits>
 #include <queue>
-#include <ranges>
 #include <stdexcept>
 #include <type_traits>
 #include <unordered_set>
