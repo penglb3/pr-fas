@@ -208,7 +208,7 @@ FAS greedy_fas(const SparseMatrix &mat) {
     for (const auto &[point, _] : graph) {
       auto d_in = gfas::get_in_degree(graph, point);
       auto d_out = gfas::get_out_degree(graph, point);
-      if (uint32_t tmp = d_out - d_in; static_cast<int>(tmp) > d_max) {
+      if (int tmp = d_out - d_in; tmp > d_max) {
         target = point;
         d_max = tmp;
       }
