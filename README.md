@@ -2,7 +2,7 @@
 PageRank FAS
 
 ## Requirements
-- Compiler supporting `c++17` (trials on godbolt.org suggests GCC >= 7, clang >= 5, msvc >= 19.15)
+- Compiler supporting `c++17` (trials on godbolt.org suggests GCC >= 8, clang >= 7, msvc >= 19.15)
 
 ## Build
 `cmake -S . -B build` and then `cmake --build build`
