@@ -89,7 +89,7 @@ int main(int argc, const char *argv[]) {
   fas_solver solver_function = page_rank_fas;
   string solver_name = "page_rank";
   if (parser.option_exists("-s")) {
-    string solver_name = parser.get_option("-s");
+    solver_name = parser.get_option("-s");
     if (auto it = func_mapping.find(solver_name); it != func_mapping.end()) {
       solver_function = func_mapping[solver_name];
     } else {
