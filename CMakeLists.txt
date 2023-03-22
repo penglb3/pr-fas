@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.18)
 project(pagerank-fas VERSION 0.1)
 set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-volatile -Wno-address-of-packed-member")
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC") # MSVC doesnt recognize these flags.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-volatile -Wno-address-of-packed-member")
+endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(ExternalProject)
@@ -36,7 +38,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines-ts -stdlib=libc++ -Wunused-but-set-variable")
 endif ()
 
-set(PRFAS_HEADERS 
+set(PRFAS_HEADERS
   src/common.h
   src/page_rank.h
 )
@@ -47,9 +49,12 @@ set(PRFAS_SOURCES
   src/greedy.cc
 )
 
-# add_executable(page_rank src/page_rank.cc ${BACKWARD_ENABLE})
 include_directories(src)
-add_library(fas SHARED ${PRFAS_SOURCES})
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  add_library(fas SHARED ${PRFAS_SOURCES})
+else()
+  add_library(fas ${PRFAS_SOURCES})
+endif()
 link_libraries(fas)
 
 add_executable(test_bench src/test_bench.cc)
@@ -63,7 +68,12 @@ add_test(NAME PageRankTest COMMAND page_rank.test)
 add_test(NAME GreedyTest COMMAND greedy.test)
 add_test(NAME SortTest COMMAND sort.test)
 
-clangformat_setup(
-  ${PRFAS_SOURCES}
-  ${PRFAS_HEADERS}
-)
+# Clang format is not necessary, so don't let it cause fatal error.
+find_program(clang_format_executable clang-format)
+if (CLANGFORMAT_EXECUTABLE OR clang_format_executable)
+  message("Clang format found")
+  clangformat_setup(
+    ${PRFAS_SOURCES}
+    ${PRFAS_HEADERS}
+  )
+endif()
