@@ -63,7 +63,11 @@ public:
     low = new int[v];
     stack_member = new bool[v];
   };
-  ~SCC_Solver() = default;
+  ~SCC_Solver(){
+    delete[] disc;
+    delete[] low;
+    delete[] stack_member;
+  };
   std::vector<SCC> operator()();
 };
 

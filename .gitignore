@@ -4,4 +4,6 @@ build*/
 *.o
 
 *.out
+# Ignore valgrind outputs.
+*.out.*
 *.exe

@@ -1,9 +1,9 @@
 #include "common.h"
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
 #include <ctime>
 #include <string>
-#include <unistd.h>
 using std::string;
 
 class InputParser {
@@ -107,13 +107,13 @@ int main(int argc, const char *argv[]) {
   printf("Testing graph has %lu vertices and %d edges\n", mat.size(), n_edges);
 
   printf("Solving start...");
-  clock_t start = clock();
+  auto start = std::chrono::high_resolution_clock::now();
   FAS result = solver_function(mat);
-  clock_t end = clock();
+  auto end = std::chrono::high_resolution_clock::now();
   puts("Done.");
 
-  float time_ms = (static_cast<float>(end - start) / CLOCKS_PER_SEC * 1000);
-  printf("Time Elapsed: %.3f(ms). \n", time_ms);
+  auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+  printf("Time Elapsed: %.3f(ms). \n", time.count() * 1e-6);
 
   float fas_percentage = result.size() * static_cast<float>(100) / n_edges;
   printf("Result FAS size = %lu (%.2f%%)\n", result.size(), fas_percentage);
