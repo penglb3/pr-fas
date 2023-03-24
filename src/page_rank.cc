@@ -119,7 +119,7 @@ void LineGraphGeneator::dfs_util(const int curr, const int e_prev) {
     int e_out = find_or_add_edge_index(edge_index, edge_table, curr, next);
     if (e_prev != -1) {
       line_graph[e_prev].emplace(e_out, 1);
-      printf("%d->%d\n", e_prev, e_out);
+      // printf("%d->%d\n", e_prev, e_out);
     }
     if (!visited[next]) {
       dfs_util(next, e_out);
@@ -128,7 +128,7 @@ void LineGraphGeneator::dfs_util(const int curr, const int e_prev) {
         int to = p.first;
         int e_other = find_or_add_edge_index(edge_index, edge_table, next, to);
         line_graph[e_out].emplace(e_other, 1);
-        printf("%d->%d\n", e_out, e_other);
+        // printf("%d->%d\n", e_out, e_other);
       }
     }
   }

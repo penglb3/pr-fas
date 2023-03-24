@@ -49,8 +49,8 @@ int main(int argc, const char *argv[]) {
       assert(mat[e_in.first][e_in.second] == 1);   // in edge exists
       assert(mat[e_out.first][e_out.second] == 1); // out edge exists
       assert(e_in.second == e_out.first);          // e_in --> V --> e_out
-      printf("(%d,%d)->(%d,%d)\n", e_in.first, e_in.second, e_out.first,
-      e_out.second);
+      // printf("(%d,%d)->(%d,%d)\n", e_in.first, e_in.second, e_out.first,
+      // e_out.second);
     }
     n_lg_edges += e_graph[i].size();
   }
