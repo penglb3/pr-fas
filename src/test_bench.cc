@@ -79,7 +79,8 @@ std::unordered_map<std::string, fas_solver> func_mapping{
     {"sort", sort_fas},
     {"greedy", greedy_fas},
     {"greedy_opt", greedy_fas_optimized},
-    {"page_rank", page_rank_fas}};
+    {"page_rank", page_rank_fas},
+    {"page_rank_lb", page_rank_fas}};
 
 // test_bench.cc
 int main(int argc, const char *argv[]) {
@@ -97,6 +98,10 @@ int main(int argc, const char *argv[]) {
     }
   }
   printf("Solver: %s\n", solver_name.c_str());
+
+  if (solver_name == "page_rank_lb") {
+    loop_based_line_graph_gen = true;
+  }
 
   string input_file = parser.get_option("-i");
   const auto [mat, n_edges] = read_input(input_file);

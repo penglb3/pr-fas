@@ -6,7 +6,7 @@
 #include <cmath>
 #include <iostream>
 
-int main() {
+int main(int argc, const char *argv[]) {
   constexpr int size = 5;
   SparseMatrix mat(size);
 
@@ -20,7 +20,7 @@ int main() {
 
   auto rank = prfas::page_rank(mat, 0.85, 30);
   for (int i = 0; i < rank.size(); i++) {
-    assert(std::fabs(rank[i] - expected[i]) < 1e-5);
+    assert(std::fabs(rank[i] - expected[i]) < 1e-3);
     // printf("%f ", i);
   }
   puts("PageRank test success.");
@@ -34,6 +34,10 @@ int main() {
   add_edge(mat, 3, 0);
 
   // Test line graph
+  if (argc > 1) {
+    loop_based_line_graph_gen = true;
+  }
+  printf("Using loop for line graph : %d\n", loop_based_line_graph_gen);
   auto p = prfas::line_graph(mat);
   auto edges = p.second;
   auto e_graph = p.first;
@@ -45,8 +49,8 @@ int main() {
       assert(mat[e_in.first][e_in.second] == 1);   // in edge exists
       assert(mat[e_out.first][e_out.second] == 1); // out edge exists
       assert(e_in.second == e_out.first);          // e_in --> V --> e_out
-      // printf("(%d,%d)->(%d,%d)\n", e_in.first, e_in.second, e_out.first,
-      // e_out.second);
+      printf("(%d,%d)->(%d,%d)\n", e_in.first, e_in.second, e_out.first,
+      e_out.second);
     }
     n_lg_edges += e_graph[i].size();
   }

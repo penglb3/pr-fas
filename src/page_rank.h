@@ -1,6 +1,6 @@
 #pragma once
 #include "common.h"
-
+#define PRFAS_LG_FOR_LOOP
 namespace prfas {
 using RankVec = std::vector<float>;
 using std::pair;
@@ -23,8 +23,8 @@ inline Edge decode_edge(uint64_t edge_code) {
 // @param max_iter : Maximum iteration numbers
 // @param stop_error : Error threshold, not yet implemented.
 // @return : the result rank vector.
-RankVec page_rank(const SparseMatrix &mat, double beta = 0.85,
-                  int max_iter = 30, double stop_error = 1e-6);
+RankVec page_rank(const SparseMatrix &mat, double beta = 1,
+                  int max_iter = 20, double stop_error = 1e-6);
 
 // Calculates the line graph in 1 pass via BFS.
 // @param G : the graph to compute line graph on, need to be strongly connected
@@ -63,7 +63,7 @@ public:
     low = new int[v];
     stack_member = new bool[v];
   };
-  ~SCC_Solver(){
+  ~SCC_Solver() {
     delete[] disc;
     delete[] low;
     delete[] stack_member;
@@ -71,4 +71,29 @@ public:
   std::vector<SCC> operator()();
 };
 
+// Implements the DFS line graph generation in original paper.
+class LineGraphGeneator {
+  const SparseMatrix &mat;
+  SparseMatrix line_graph;
+  unordered_map<uint64_t, int> edge_index;
+  vector<Edge> edge_table;
+  vector<bool> visited;
+
+public:
+  explicit LineGraphGeneator(const SparseMatrix &mat)
+      : mat(mat), visited(mat.size(), false) {
+    int n_edges = 0;
+    for (const auto &row : mat) {
+      n_edges += row.size();
+    }
+    line_graph = SparseMatrix(n_edges);
+    edge_table = vector<Edge>(n_edges);
+  };
+  ~LineGraphGeneator() = default;
+  void dfs_util(int curr, int prev);
+  pair<SparseMatrix, vector<Edge>> operator()() {
+    dfs_util(0, -1);
+    return {line_graph, edge_table};
+  }
+};
 } // namespace prfas

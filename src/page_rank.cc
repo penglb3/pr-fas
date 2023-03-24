@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -53,14 +54,21 @@ inline RankVec operator*(const RankVec &vec, const T val) {
   return val * vec;
 }
 
+inline float l1_error(const RankVec &v1, const RankVec &v2) {
+  float res = 0;
+  for (int i = 0; i < v1.size(); i++) {
+    res += std::fabs(v1[i] - v2[i]);
+  }
+  return res;
+}
+
 RankVec page_rank(const SparseMatrix &mat, const double beta,
                   const int max_iter, const double stop_error) {
   const auto size = mat.size();
   RankVec rank(size, static_cast<float>(1) / size);
-  double error = std::numeric_limits<double>::infinity();
-  for (int i = 0; i < max_iter || error < stop_error; i++) {
+  for (int i = 0; i < max_iter; i++) {
     rank = (beta * rank * mat) + (1 - beta) / size;
-    // TODO(maybe add error computation)
+    // No error computation is used, because that takes way too much time.
   }
   return rank;
 }
@@ -77,6 +85,9 @@ inline int find_or_add_edge_index(unordered_map<uint64_t, int> &index,
 }
 
 auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
+  if (!loop_based_line_graph_gen) {
+    return LineGraphGeneator(G)();
+  }
   int n_edges = 0;
   for (const auto &row : G) {
     n_edges += row.size();
@@ -92,12 +103,35 @@ auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
       for (const auto &kv : G[mid]) {
         int end = kv.first;
         int e_out = find_or_add_edge_index(edge_index, edge_table, mid, end);
-        res[e_in][e_out] = 1;
+        res[e_in].emplace(e_out, 1);
         // printf("#(%d,%d)->#(%d,%d)\n", begin, mid, mid, end);
       }
     }
   }
   return {res, edge_table};
+}
+
+// NOTE: curr is point index, while e_prev is EDGE index!
+void LineGraphGeneator::dfs_util(const int curr, const int e_prev) {
+  visited[curr] = true;
+  for (const auto &p : mat[curr]) {
+    int next = p.first;
+    int e_out = find_or_add_edge_index(edge_index, edge_table, curr, next);
+    if (e_prev != -1) {
+      line_graph[e_prev].emplace(e_out, 1);
+      printf("%d->%d\n", e_prev, e_out);
+    }
+    if (!visited[next]) {
+      dfs_util(next, e_out);
+    } else {
+      for (const auto &p : mat[next]) {
+        int to = p.first;
+        int e_other = find_or_add_edge_index(edge_index, edge_table, next, to);
+        line_graph[e_out].emplace(e_other, 1);
+        printf("%d->%d\n", e_out, e_other);
+      }
+    }
+  }
 }
 
 using std::min;
@@ -214,6 +248,8 @@ inline int argmax(const prfas::RankVec &rank) {
   }
   return index;
 };
+
+bool loop_based_line_graph_gen = false;
 
 using std::vector;
 FAS page_rank_fas(const SparseMatrix &original_mat) {

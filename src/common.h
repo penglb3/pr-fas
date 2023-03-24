@@ -36,6 +36,8 @@ inline uint32_t get_in_degree(const SparseMatrix &mat, int point) {
   return count;
 }
 
+extern bool loop_based_line_graph_gen;
+
 using FAS = std::vector<Edge>;
 using fas_solver = std::function<FAS(const SparseMatrix &)>;
 FAS sort_fas(const SparseMatrix &mat);

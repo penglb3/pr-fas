@@ -6,12 +6,15 @@ PageRank FAS
 - Compiler supporting `c++17` (trials on godbolt.org suggests GCC >= 7, clang >= 5, msvc >= 19.15)
 
 ## Build
-`cmake -S . -B build` and then `cmake --build build`
+`cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo` and then `cmake --build build`
 
-(If you have `ninja-build` installed, you can do `cmake -S . -B build -G Ninja` for the first step to speed things up.)
+Note: `CMAKE_BUILD_TYPE` greatly affects the performance of program! For best performance, use `-DCMAKE_BUILD_TYPE=Release`!
+
+(If you have `ninja-build` installed, you can add `-G Ninja` to the first step to speed things up.)
 
 ## Run
 `./build/test_bench [-s greedy|greedy_opt|sort|page_rank] [-i <input_file_path>]`
+FYI, `page_rank` takes ~4s to finish on `data/v300_e2731.txt` while others take <0.2s. So please BE PATIENT when you use it.
 
 Parameters:
 - `-s`: Specify solver. Optional. Default value = `page_rank`
