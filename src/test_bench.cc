@@ -124,5 +124,10 @@ int main(int argc, const char *argv[]) {
   printf("Result FAS size = %lu (%.2f%%)\n", result.size(), fas_percentage);
   // Do some validation and test.
 
+  if (parser.option_exists("-p")) {
+    puts("\nResult FAS:");
+    print_ans(result);
+  }
+
   return 0;
 }

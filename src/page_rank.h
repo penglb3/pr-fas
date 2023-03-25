@@ -1,6 +1,6 @@
 #pragma once
 #include "common.h"
-#define PRFAS_LG_FOR_LOOP
+
 namespace prfas {
 using RankVec = std::vector<float>;
 using std::pair;
@@ -23,10 +23,10 @@ inline Edge decode_edge(uint64_t edge_code) {
 // @param max_iter : Maximum iteration numbers
 // @param stop_error : Error threshold, not yet implemented.
 // @return : the result rank vector.
-RankVec page_rank(const SparseMatrix &mat, double beta = 1,
-                  int max_iter = 20, double stop_error = 1e-6);
+RankVec page_rank(const SparseMatrix &mat, float beta = 1, int max_iter = 30,
+                  float stop_error = 1e-5);
 
-// Calculates the line graph in 1 pass via BFS.
+// Calculates the line graph in 1 pass via DFS or for loop.
 // @param G : the graph to compute line graph on, need to be strongly connected
 // @return : The result line graph and the edge index to recover edge info
 auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>>;
@@ -45,11 +45,11 @@ class SCC_Solver {
   // Current node's discovery time
   int time;
   // Stores the discovery times of the nodes
-  int *disc;
+  std::vector<int> disc;
   // Stores the nodes with least discovery time
-  int *low;
+  std::vector<int> low;
   // Checks whether a node is in the stack or not
-  bool *stack_member;
+  std::vector<bool> stack_member;
   // The result SCC
   std::vector<SCC> scc;
 
@@ -57,17 +57,9 @@ class SCC_Solver {
   void scc_util(int u);
 
 public:
-  explicit SCC_Solver(const SparseMatrix &mat) : mat(mat) {
-    int v = mat.size();
-    disc = new int[v];
-    low = new int[v];
-    stack_member = new bool[v];
-  };
-  ~SCC_Solver() {
-    delete[] disc;
-    delete[] low;
-    delete[] stack_member;
-  };
+  explicit SCC_Solver(const SparseMatrix &mat)
+      : mat(mat), disc(mat.size()), low(mat.size()), stack_member(mat.size()){};
+  ~SCC_Solver() = default;
   std::vector<SCC> operator()();
 };
 

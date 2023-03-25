@@ -5,8 +5,6 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
-#include <limits>
-#include <queue>
 #include <stdexcept>
 #include <type_traits>
 #include <unordered_set>
@@ -62,13 +60,15 @@ inline float l1_error(const RankVec &v1, const RankVec &v2) {
   return res;
 }
 
-RankVec page_rank(const SparseMatrix &mat, const double beta,
-                  const int max_iter, const double stop_error) {
+RankVec page_rank(const SparseMatrix &mat, const float beta,
+                  const int max_iter, const float stop_error) {
   const auto size = mat.size();
-  RankVec rank(size, static_cast<float>(1) / size);
-  for (int i = 0; i < max_iter; i++) {
-    rank = (beta * rank * mat) + (1 - beta) / size;
-    // No error computation is used, because that takes way too much time.
+  RankVec rank_new, rank(size, static_cast<float>(1) / size);
+  float error = stop_error + 1;
+  for (int i = 0; i < max_iter && error > stop_error; i++) {
+    rank_new = (beta * rank * mat) + (1 - beta) / size;
+    error = l1_error(rank_new, rank);
+    rank = rank_new;
   }
   return rank;
 }
@@ -102,8 +102,8 @@ auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
       int e_in = find_or_add_edge_index(edge_index, edge_table, begin, mid);
       for (const auto &kv : G[mid]) {
         int end = kv.first;
-        int e_out = find_or_add_edge_index(edge_index, edge_table, mid, end);
-        res[e_in].emplace(e_out, 1);
+        int e_curr = find_or_add_edge_index(edge_index, edge_table, mid, end);
+        res[e_in].emplace(e_curr, 1);
         // printf("#(%d,%d)->#(%d,%d)\n", begin, mid, mid, end);
       }
     }
@@ -116,19 +116,19 @@ void LineGraphGeneator::dfs_util(const int curr, const int e_prev) {
   visited[curr] = true;
   for (const auto &p : mat[curr]) {
     int next = p.first;
-    int e_out = find_or_add_edge_index(edge_index, edge_table, curr, next);
+    int e_curr = find_or_add_edge_index(edge_index, edge_table, curr, next);
     if (e_prev != -1) {
-      line_graph[e_prev].emplace(e_out, 1);
-      // printf("%d->%d\n", e_prev, e_out);
+      line_graph[e_prev].emplace(e_curr, 1);
+      // printf("%d->%d\n", e_prev, e_curr);
     }
     if (!visited[next]) {
-      dfs_util(next, e_out);
+      dfs_util(next, e_curr);
     } else {
       for (const auto &p : mat[next]) {
         int to = p.first;
-        int e_other = find_or_add_edge_index(edge_index, edge_table, next, to);
-        line_graph[e_out].emplace(e_other, 1);
-        // printf("%d->%d\n", e_out, e_other);
+        int e_next = find_or_add_edge_index(edge_index, edge_table, next, to);
+        line_graph[e_curr].emplace(e_next, 1);
+        // printf("%d->%d\n", e_curr, e_next);
       }
     }
   }
