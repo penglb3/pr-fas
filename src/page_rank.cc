@@ -11,12 +11,16 @@
 
 namespace prfas {
 
+/* **********************************
+ * Section 1: PageRank computation
+ ********************************** */
+
 // PageRank iteration step: vec = vec * mat
 inline RankVec operator*(const RankVec &vec, const SparseMatrix &mat) {
   RankVec res(vec.size(), 0);
   for (int i = 0; i < mat.size(); i++) {
-    for (auto kv : mat[i]) {
-      res[kv.first] += vec[i] * kv.second / get_out_degree(mat, i);
+    for (const auto &kv : mat[i]) {
+      res[kv.first] += vec[i] / get_out_degree(mat, i);
     }
   }
   return res;
@@ -60,8 +64,8 @@ inline float l1_error(const RankVec &v1, const RankVec &v2) {
   return res;
 }
 
-RankVec page_rank(const SparseMatrix &mat, const float beta,
-                  const int max_iter, const float stop_error) {
+RankVec page_rank(const SparseMatrix &mat, const float beta, const int max_iter,
+                  const float stop_error) {
   const auto size = mat.size();
   RankVec rank_new, rank(size, static_cast<float>(1) / size);
   float error = stop_error + 1;
@@ -72,6 +76,10 @@ RankVec page_rank(const SparseMatrix &mat, const float beta,
   }
   return rank;
 }
+
+/* **********************************
+ * Section 2: Line Graph Generation
+ ********************************** */
 
 inline int find_or_add_edge_index(unordered_map<uint64_t, int> &index,
                                   vector<Edge> &table, int from, int to) {
@@ -85,12 +93,12 @@ inline int find_or_add_edge_index(unordered_map<uint64_t, int> &index,
 }
 
 auto line_graph(const SparseMatrix &G) -> pair<SparseMatrix, vector<Edge>> {
-  if (!loop_based_line_graph_gen) {
-    return LineGraphGeneator(G)();
-  }
   int n_edges = 0;
   for (const auto &row : G) {
     n_edges += row.size();
+  }
+  if (!loop_based_line_graph_gen) {
+    return LineGraphGeneator(G, n_edges)();
   }
   SparseMatrix res(n_edges);
   unordered_map<uint64_t, int> edge_index;
@@ -133,6 +141,10 @@ void LineGraphGeneator::dfs_util(const int curr, const int e_prev) {
     }
   }
 }
+
+/* **********************************
+ * Section 3: SCC extraction
+ ********************************** */
 
 using std::min;
 using std::stack;
@@ -195,7 +207,7 @@ void SCC_Solver::scc_util(int u) {
           }
         }
       }
-      scc.emplace_back(scc_mat, vertex_id);
+      result_scc.emplace_back(scc_mat, vertex_id);
     }
     // std::cout << w << "\n";
     stack_member[w] = false;
@@ -204,12 +216,12 @@ void SCC_Solver::scc_util(int u) {
 }
 
 // Function to find the SCC in the graph
-auto SCC_Solver::operator()() -> vector<SCC> {
+auto SCC_Solver::operator()() -> const vector<SCC> & {
   int v = mat.size();
   time = 0;
   // Clear last calculation's result
-  if (!scc.empty()) {
-    scc.clear();
+  if (!result_scc.empty()) {
+    result_scc.clear();
   }
 
   // Initialize disc and low, and stackMember arrays
@@ -232,10 +244,14 @@ auto SCC_Solver::operator()() -> vector<SCC> {
     st.pop();
   }
 
-  return scc;
+  return result_scc;
 }
 
 }; // namespace prfas
+
+/* **********************************
+ * Section 4: FAS algorithm
+ ********************************** */
 
 inline int argmax(const prfas::RankVec &rank) {
   int index = 0;
@@ -257,24 +273,24 @@ FAS page_rank_fas(const SparseMatrix &original_mat) {
   FAS result;
   // Extract SCCs from mat
   SparseMatrix mat(original_mat);
-  auto solver = prfas::SCC_Solver(mat);
-  auto SCCs = solver();
+  prfas::SCC_Solver solver(mat);
+  solver();
   // While SCCs is not empty:
-  while (!SCCs.empty()) {
+  while (!solver.result_scc.empty()) {
     //   for scc, v_index in SCCs:
-    for (const prfas::SCC &scc : SCCs) {
-      SparseMatrix scc_m = scc.first;
-      vector<int> v_index = scc.second;
+    for (const prfas::SCC &scc : solver.result_scc) {
+      const SparseMatrix &scc_m = scc.first;
+      const vector<int> &v_index = scc.second;
       //     e_graph, edges = line_graph(scc)
-      auto lg = prfas::line_graph(scc_m);
-      SparseMatrix e_graph = lg.first;
-      vector<Edge> edges = lg.second;
+      const auto &lg = prfas::line_graph(scc_m);
+      const SparseMatrix &e_graph = lg.first;
+      const vector<Edge> &edges = lg.second;
       //     rank = page_rank(scc)
-      auto rank = prfas::page_rank(e_graph);
+      const auto &rank = prfas::page_rank(e_graph);
       //     fa_index = argmax(rank)
       int fa_index = argmax(rank);
       //     fa_scc = edges[fa_index]
-      Edge fa_scc = edges[fa_index];
+      const Edge &fa_scc = edges[fa_index];
       //     fa = {v_index[fa_scc.from], v_index[fa_scc.to]}
       Edge fa = {v_index[fa_scc.first], v_index[fa_scc.second]};
       //     FAS.append(fa)
@@ -283,7 +299,7 @@ FAS page_rank_fas(const SparseMatrix &original_mat) {
       remove_edge(mat, fa);
     }
     //   Extract SCCs from mat
-    SCCs = solver();
+    solver();
   }
   // return FAS;
   return result;

@@ -50,17 +50,18 @@ class SCC_Solver {
   std::vector<int> low;
   // Checks whether a node is in the stack or not
   std::vector<bool> stack_member;
-  // The result SCC
-  std::vector<SCC> scc;
 
   // A Recursive DFS based function used by SCC
   void scc_util(int u);
 
 public:
+  // The result SCC
+  std::vector<SCC> result_scc;
+
   explicit SCC_Solver(const SparseMatrix &mat)
       : mat(mat), disc(mat.size()), low(mat.size()), stack_member(mat.size()){};
   ~SCC_Solver() = default;
-  std::vector<SCC> operator()();
+  const std::vector<SCC> &operator()();
 };
 
 // Implements the DFS line graph generation in original paper.
@@ -72,15 +73,9 @@ class LineGraphGeneator {
   vector<bool> visited;
 
 public:
-  explicit LineGraphGeneator(const SparseMatrix &mat)
-      : mat(mat), visited(mat.size(), false) {
-    int n_edges = 0;
-    for (const auto &row : mat) {
-      n_edges += row.size();
-    }
-    line_graph = SparseMatrix(n_edges);
-    edge_table = vector<Edge>(n_edges);
-  };
+  explicit LineGraphGeneator(const SparseMatrix &mat, const int n_edges)
+      : mat(mat), visited(mat.size(), false), line_graph(n_edges),
+        edge_table(n_edges){};
   ~LineGraphGeneator() = default;
   void dfs_util(int curr, int prev);
   pair<SparseMatrix, vector<Edge>> operator()() {
