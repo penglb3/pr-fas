@@ -46,7 +46,6 @@ auto read_input(const string &filename) -> std::pair<SparseMatrix, int> {
     add_edge(mat, 6, 4);
     return {mat, 8};
   }
-  // TODO(We need to know the dataset format!)
   FILE *file = fopen(filename.c_str(), "r");
   if (file == nullptr) {
     printf("File '%s' doesn't exist.\n", filename.c_str());
@@ -58,11 +57,12 @@ auto read_input(const string &filename) -> std::pair<SparseMatrix, int> {
     printf("Can't read graph size\n");
     return {};
   }
+  char sep[4];
   SparseMatrix mat(size);
   while (n_scanned != EOF) {
-    n_scanned = fscanf(file, "%d %d", &from, &to);
+    n_scanned = fscanf(file, "%d%3[ ,]%d", &from, sep, &to);
     switch (n_scanned) {
-    case 2:
+    case 3:
       add_edge(mat, from, to);
       n_edges++;
       break;
@@ -112,6 +112,7 @@ int main(int argc, const char *argv[]) {
   printf("Testing graph has %lu vertices and %d edges\n", mat.size(), n_edges);
 
   printf("Solving start...");
+  fflush(stdout);
   auto start = std::chrono::high_resolution_clock::now();
   FAS result = solver_function(mat);
   auto end = std::chrono::high_resolution_clock::now();
