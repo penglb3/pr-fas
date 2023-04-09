@@ -34,7 +34,7 @@ These results are obtained in test env #1, one solver per thread, multi-threaded
 |  **PageRank(LB)** 	|     21:07     	|      14.68     	|    12:07:09   	|      11.02     	|
 | **PageRank(DFS)** 	|     22:18     	|      14.68     	|    12:32:02   	|      11.02     	|
 |  **Greedy(Opt)**  	|     00:06     	|      18.89     	|    00:04:01   	|      12.58     	|
-|  **Greedy(Naive)**    |     45:33     	|      18.23     	|    (>37hrs)      	|       N/A       	|
+|  **Greedy(Naive)**    |     45:33     	|      18.23     	|    101:04:18     	|      11.91       	|
 |      **Sort**     	|     00:02     	|      20.17     	|    00:00:57   	|      14.16     	|
 
 (By the time I wrote this down, Greedy Naive on enron has taken 37hrs and not yet finished. I will update the form once it's done.)
@@ -43,7 +43,7 @@ These results are obtained in test env #1, one solver per thread, multi-threaded
 We are able to compile and run the programs under these environments:
 
 **#1**
-- CPU: Intel Xeon Gold 6230N (20c40t)
+- CPU: Intel Xeon Gold 6230N (20c40t @2.3~3.5GHz)
 - DRAM: 192GB DDR4 2400MHz
 - OS: Ubuntu 22.04
 - Compiler: GCC 11.3.0
