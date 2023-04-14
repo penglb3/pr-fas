@@ -13,7 +13,7 @@ WARNING: We have **MODIFIED DATA FILE** from TA (added num of vertices at the be
 `./bin/test_bench [-s <solver_name>] [-i <input_file_path>] [-p]`
 
 Parameters:
-- `-s`: Specify solver. Optional. Default value = `page_rank`. Available options are: `greedy`, `sort`, `page_rank`, `greedy_opt`(optimized greedy), `page_rank_lb`(PageRank using loop based line graph generation). See [Results](#-results) below for how much time each solver would take.
+- `-s`: Specify solver. Optional. Default value = `page_rank`. Available options are: `greedy`, `sort`, `page_rank`, `greedy_opt`(optimized greedy), `page_rank_lb`(PageRank using loop based line graph generation). See [Results](#results) below for how much time each solver would take.
 - `-i`: Specify input dataset file path. Optional. Default = use standard small graph from TA's slides.
 - `-p`: Print out result FAS when specified.
 
@@ -24,7 +24,7 @@ Note: `CMAKE_BUILD_TYPE` greatly affects the performance of program! So make sur
 
 (If you have `ninja-build` installed, you can add `-G Ninja` to the first step to speed things up.)
 
-You will find the `test_bench` executable in `./build`, the rest is the same as [Running](#-running) above.
+You will find the `test_bench` executable in `./build`, the rest is the same as [Running](#running) above.
 
 ## Results
 These results are obtained in test env #1, one solver per thread, multi-threaded. Therefore you may achieve much better time when you run a solver alone. **Peak memory usage** on WA-2011 and enron are **~100MB** and **~980MB** respectively, both achieved by PageRank.
