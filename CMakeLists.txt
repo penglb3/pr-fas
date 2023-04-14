@@ -56,7 +56,7 @@ set(PRFAS_SOURCES
 
 include_directories(src)
 if (NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-  add_library(fas SHARED ${PRFAS_SOURCES})
+  add_library(fas ${PRFAS_SOURCES})
 else()
   add_library(fas ${PRFAS_SOURCES})
 endif()
